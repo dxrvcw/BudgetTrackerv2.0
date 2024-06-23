@@ -17,9 +17,9 @@ export default function DashboardLayout({
 	}
 
 	return (
-		<div className='flex container justify-between gap-8 m-auto h-screen items-center py-4'>
+		<div className='flex container justify-between gap-8 m-auto h-screen '>
 			{/* Sidebar for larger screens */}
-			<aside className='shadow-lg w-full rounded-2xl px-4 py-6 basis-1/4 h-full hidden md:block'>
+			<aside className='shadow-lg w-full rounded-2xl px-4 py-6  basis-1/4 h-full hidden md:block'>
 				<h1 className='text-2xl text-center'>Budget dashboard</h1>
 				<SidebarNav />
 			</aside>

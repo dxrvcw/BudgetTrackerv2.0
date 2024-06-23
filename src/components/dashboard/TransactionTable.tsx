@@ -56,7 +56,7 @@ export async function TransactionTable({
 					))}
 				</div>
 			</div>
-			<div className='flex justify-end'>
+			<div className='flex justify-end mt-4'>
 				<Link
 					href='/dashboard/transactions'
 					className='text-lg flex gap-2 items-center hover:underline'

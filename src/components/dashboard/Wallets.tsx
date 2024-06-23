@@ -7,9 +7,13 @@ import { Wallet } from './Wallet'
 export async function Wallets({
 	className,
 	user_id,
+	link = true,
+	controls,
 }: {
 	className?: string
 	user_id: string
+	link?: boolean
+	controls: boolean
 }) {
 	const wallets = await getWallets(user_id)
 
@@ -22,18 +26,26 @@ export async function Wallets({
 			</p>
 			<div className='flex-grow flex flex-col gap-4'>
 				{wallets?.map(wallet => (
-					<Wallet key={wallet.id} balance={wallet.balance} name={wallet.name} />
+					<Wallet
+						key={wallet.id}
+						balance={wallet.balance}
+						name={wallet.name}
+						wallet_id={wallet.id}
+						controls={controls}
+					/>
 				))}
 			</div>
-			<div className='flex justify-end'>
-				<Link
-					href='/dashboard/wallets'
-					className='text-lg flex gap-2 items-center hover:underline'
-				>
-					See all wallets
-					<FaArrowRightLong size={16} />
-				</Link>
-			</div>
+			{link && (
+				<div className='flex justify-end mt-4'>
+					<Link
+						href='/dashboard/wallets'
+						className='text-lg flex gap-2 items-center hover:underline'
+					>
+						See all wallets
+						<FaArrowRightLong size={16} />
+					</Link>
+				</div>
+			)}
 		</div>
 	)
 }
