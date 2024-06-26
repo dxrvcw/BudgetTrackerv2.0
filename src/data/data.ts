@@ -7,15 +7,15 @@ export const getWallets = async (user_id: string) => {
 			userId: user_id,
 		},
 	})
-	return wallets
+	return wallets || []
 }
 
 export const getTransactions = async (
 	user_id: string,
 	date_from?: string,
 	date_to?: string,
-	category_id?: string,
-	wallet_id?: string
+	category_id?: string[] | string,
+	wallet_id?: string[] | string
 ) => {
 	noStore()
 
@@ -28,14 +28,14 @@ export const getTransactions = async (
 		whereClause.date = { ...whereClause.date, lte: new Date(date_to) }
 	}
 	if (category_id) {
-		whereClause.categoryId = category_id
+		whereClause.categoryId = { in: category_id }
 	}
 	if (wallet_id) {
-		whereClause.walletId = wallet_id
+		whereClause.walletId = { in: wallet_id }
 	}
 
 	const transactions = await prisma?.transaction.findMany({
-		where: whereClause,
+		where: { ...whereClause },
 	})
 
 	return transactions
@@ -48,5 +48,5 @@ export const getCategories = async (user_id: string) => {
 			userId: user_id,
 		},
 	})
-	return categories
+	return categories || []
 }

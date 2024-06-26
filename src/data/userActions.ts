@@ -5,17 +5,13 @@ import bcrypt from 'bcrypt'
 import { revalidatePath } from 'next/cache'
 
 export async function registerUser(email: string, password: string) {
-	try {
-		const user = await prisma.user.create({
-			data: {
-				email,
-				password: await bcrypt.hash(password, await bcrypt.genSalt(10)),
-			},
-		})
-		return user
-	} catch {
-		return null
-	}
+	const user = await prisma.user.create({
+		data: {
+			email,
+			password: await bcrypt.hash(password, await bcrypt.genSalt(10)),
+		},
+	})
+	return user
 }
 
 export async function addWallet(
@@ -116,4 +112,39 @@ export async function updateCategory(category_id: string, name: string) {
 	} catch {
 		return null
 	}
+}
+
+export async function addTransaction(
+	user_id: string,
+	category_id: string,
+	wallet_id: string,
+	date: string,
+	amount: number,
+	description?: string
+) {
+	const wallet = await prisma.wallet.findFirst({ where: { id: wallet_id } })
+	if (!wallet || wallet?.balance < amount) return
+
+	const newTransaction = await prisma.transaction.create({
+		data: {
+			userId: user_id,
+			categoryId: category_id,
+			walletId: wallet_id,
+			date: date,
+			description: description,
+			amount,
+		},
+	})
+
+	await prisma.wallet.update({
+		where: {
+			id: wallet_id,
+		},
+		data: {
+			balance: wallet.balance - amount,
+		},
+	})
+
+	revalidatePath('/dashboard/:path*')
+	return newTransaction
 }
