@@ -1,4 +1,5 @@
 import type { ICategory, ITransaction, IWallet } from '@/utils/definitions'
+import { TransactionControls } from './TransactionControls'
 
 export function Table({
 	transactions,
@@ -35,8 +36,7 @@ export function Table({
 							: '-' + transaction.amount}
 					</p>
 					<div className='flex gap-2'>
-						<button>Edit</button>
-						<button>Delete</button>
+						<TransactionControls id={transaction.id} />
 					</div>
 				</div>
 			))}

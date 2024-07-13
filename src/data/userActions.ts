@@ -148,3 +148,109 @@ export async function addTransaction(
 	revalidatePath('/dashboard/:path*')
 	return newTransaction
 }
+
+export async function deleteTransaction(transaction_id: string) {
+	const transaction = await prisma.transaction.findFirst({
+		where: {
+			id: transaction_id,
+		},
+	})
+
+	if (!transaction) return { status: 'Cannot find transaction!' }
+
+	const wallet = await prisma.wallet.findFirst({
+		where: {
+			id: transaction.walletId,
+		},
+	})
+
+	if (!wallet) return { status: 'Cannot find wallet!' }
+
+	if (wallet.balance < transaction.amount && transaction.amount > 0)
+		return { status: 'Insufficient funds!' }
+
+	await prisma.wallet.update({
+		where: {
+			id: transaction.walletId,
+		},
+		data: {
+			balance: wallet.balance - transaction.amount,
+		},
+	})
+
+	await prisma.transaction.delete({
+		where: {
+			id: transaction_id,
+		},
+	})
+	revalidatePath('/dashboard/:path*')
+	return { status: 'Success!' }
+}
+
+export async function editTransaction(
+	transaction_id: string,
+	description: string,
+	amount: string,
+	date: string,
+	wallet_id: string,
+	category_id: string
+) {
+	const newWallet = await prisma.wallet.findFirst({
+		where: {
+			id: wallet_id,
+		},
+	})
+	if (!newWallet) return { status: 'Cannot find wallet!' }
+
+	const transaction = await prisma.transaction.findFirst({
+		where: {
+			id: transaction_id,
+		},
+	})
+	if (!transaction) return { status: 'Cannot find transaction!' }
+
+	const oldWallet = await prisma.wallet.findFirst({
+		where: {
+			id: transaction.walletId,
+		},
+	})
+	if (!oldWallet) return { status: 'Cannot find wallet!' }
+
+	const oldWalletBalance = oldWallet.balance - +amount
+	const newWalletBalance = newWallet.balance + +amount
+
+	if (oldWalletBalance < 0 || newWalletBalance < 0) {
+		return { status: 'Insufficient funds!' }
+	}
+
+	await prisma.transaction.update({
+		where: {
+			id: transaction_id,
+		},
+		data: {
+			description: description,
+			amount: +amount,
+			date: date,
+			walletId: wallet_id,
+			categoryId: category_id,
+		},
+	})
+	await prisma.wallet.update({
+		where: {
+			id: oldWallet.id,
+		},
+		data: {
+			balance: oldWalletBalance,
+		},
+	})
+	await prisma.wallet.update({
+		where: {
+			id: newWallet.id,
+		},
+		data: {
+			balance: newWalletBalance,
+		},
+	})
+	revalidatePath('/dashboard/:path*')
+	return { status: 'Success!' }
+}
